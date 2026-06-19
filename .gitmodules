@@ -1,0 +1,3 @@
+[submodule "components/my_components"]
+	path = components/my_components
+	url = https://github.com/NisaelMoreiraGomes/my_components
