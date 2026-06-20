@@ -3,7 +3,6 @@
 #include "assets/fonts/inter_semibold_48.c"
 #include "assets/fonts/inter_semibold_64.c"
 #include "assets/images/logo.c"
-#include "esp_log.h"
 
 static lv_obj_t *temp_label = NULL;
 static lv_obj_t *unity_label = NULL;
