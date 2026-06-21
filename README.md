@@ -56,6 +56,8 @@ git clone https://github.com/NisaelMoreiraGomes/weather-report.git
 
 cd weather-report
 
+git submodule update --init --recursive
+
 idf.py set-target esp32
 idf.py build
 idf.py flash
