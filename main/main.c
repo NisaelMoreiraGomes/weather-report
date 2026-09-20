@@ -9,10 +9,16 @@
 
 #include "esp_log.h"
 
-static uint32_t get_millis(void);
-static void vReadTempTask(void *pvParameters);
+#define QUEUE_SEND_DELAY_MS 100
+#define QUEUE_RECEIVE_DELAY_MS 0
 
-static const char *TAG = "render";
+static uint32_t get_millis(void);
+
+static void vReadTempTask(void *pvParameters);
+static void vDrawTask(void *pvParameters);
+
+static const char *TAG = "queue";
+
 typedef struct
 {
     int16_t temp;
@@ -31,18 +37,58 @@ void app_main(void)
         return;
     }
 
-    display_setup(100);
+    ESP_ERROR_CHECK(
+        // I find the brightness at 100% (255) too strong on this display,
+        // so I reduced it slightly to make it more comfortable.
+        display_setup(100));
     lvgl_setup(get_millis);
     ui_setup();
 
-    xTaskCreate(vReadTempTask, "read_temp", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    xTaskCreate(vReadTempTask, "vReadTempTask", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    /**
+     * I preferred to prioritize reading the sensor.
+     * Rendering can wait a bit; the data is more important.
+     */
+    xTaskCreate(vDrawTask, "vDrawTask", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL);
+}
 
+static uint32_t get_millis(void)
+{
+    return pdTICKS_TO_MS(xTaskGetTickCount());
+}
+
+static void vReadTempTask(void *pvParameters)
+{
+    sensor_data_t sensor = {.temp = 0, .humidity = 0};
+
+    // Minimum time for components to start and avoid overloading the queue.
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    for (;;)
+    {
+        ESP_ERROR_CHECK(dht_read_temp(&sensor.temp, &sensor.humidity));
+
+        sensor.temp /= 10;
+        sensor.humidity /= 10;
+
+        if (xQueueSend(queue_handle, &sensor, pdMS_TO_TICKS(QUEUE_SEND_DELAY_MS)) != pdPASS)
+        {
+            ESP_LOGE(TAG, "Error sending data to queue.");
+        }
+
+        // It is recommended to wait 2 seconds before starting the next reading.
+        vTaskDelay(pdMS_TO_TICKS(2000));
+    }
+}
+
+static void vDrawTask(void *pvParameters)
+{
     sensor_data_t received;
 
-    while (true)
+    for (;;)
     {
         // We don't wait any time; if there's nothing there, refresh the screen as quickly as possible.
-        if (xQueueReceive(queue_handle, &received, 0) == pdPASS)
+        if (xQueueReceive(queue_handle, &received, pdMS_TO_TICKS(QUEUE_RECEIVE_DELAY_MS)) == pdPASS)
         {
             ESP_LOGI(TAG, "temp: %d, humidity: %d", received.temp, received.humidity);
             ui_update(received.temp, received.humidity);
@@ -60,34 +106,5 @@ void app_main(void)
             time = 16;
 
         vTaskDelay(pdMS_TO_TICKS(time));
-    }
-}
-
-static uint32_t get_millis(void)
-{
-    return pdTICKS_TO_MS(xTaskGetTickCount());
-}
-
-static void vReadTempTask(void *pvParameters)
-{
-    sensor_data_t sensor = {.temp = 0, .humidity = 0};
-
-    // Minimum time for components to start and avoid overloading the queue.
-    vTaskDelay(pdMS_TO_TICKS(1000));
-
-    while (true)
-    {
-        ESP_ERROR_CHECK(dht_read_temp(&sensor.temp, &sensor.humidity));
-
-        sensor.temp /= 10;
-        sensor.humidity /= 10;
-
-        if (xQueueSend(queue_handle, &sensor, pdMS_TO_TICKS(100)) != pdPASS)
-        {
-            ESP_LOGE(TAG, "Error sending data to queue.");
-        }
-
-        // It is recommended to wait 2 seconds before starting the next reading.
-        vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }
