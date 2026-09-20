@@ -9,11 +9,6 @@
 
 #include "esp_log.h"
 
-static lv_color_t *buf1;
-static lv_color_t *buf2;
-
-static lv_display_t *display;
-
 static uint32_t get_millis(void);
 static void vReadTempTask(void *pvParameters);
 
@@ -36,9 +31,8 @@ void app_main(void)
         return;
     }
 
-    display_setup();
-    display_set_brightness(100);
-    lvgl_setup(display, buf1, buf2, get_millis);
+    display_setup(100);
+    lvgl_setup(get_millis);
     ui_setup();
 
     xTaskCreate(vReadTempTask, "read_temp", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
