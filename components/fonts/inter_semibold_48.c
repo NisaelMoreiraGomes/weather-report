@@ -1,28 +1,4 @@
-/*******************************************************************************
- * Size: 48 px
- * Bpp: 4
- * Opts: --bpp 4 --size 48 --no-compress --stride 1 --align 1 --font Inter_28pt-SemiBold.ttf --range 67,70 --format lvgl -o inter_semibold_48.c
- ******************************************************************************/
-
-#ifdef __has_include
-    #if __has_include("lvgl.h")
-        #ifndef LV_LVGL_H_INCLUDE_SIMPLE
-            #define LV_LVGL_H_INCLUDE_SIMPLE
-        #endif
-    #endif
-#endif
-
-#ifdef LV_LVGL_H_INCLUDE_SIMPLE
-    #include "lvgl.h"
-#else
-    #include "lvgl/lvgl.h"
-#endif
-
-
-
-#ifndef INTER_SEMIBOLD_48
-#define INTER_SEMIBOLD_48 1
-#endif
+#include "inter_semibold_48.h"
 
 #if INTER_SEMIBOLD_48
 
@@ -227,7 +203,6 @@ static lv_font_fmt_txt_dsc_t font_dsc = {
 };
 
 
-
 /*-----------------
  *  PUBLIC FONT
  *----------------*/
@@ -256,7 +231,6 @@ lv_font_t inter_semibold_48 = {
 #endif
     .user_data = NULL,
 };
-
 
 
 #endif /*#if INTER_SEMIBOLD_48*/

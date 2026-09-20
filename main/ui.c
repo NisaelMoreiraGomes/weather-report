@@ -1,8 +1,8 @@
 #include "ui.h"
 #include "lvgl.h"
-#include "assets/fonts/inter_semibold_48.c"
-#include "assets/fonts/inter_semibold_64.c"
-#include "assets/images/logo.c"
+#include "inter_semibold_64.h"
+#include "inter_semibold_48.h"
+#include "logo.h"
 
 static lv_obj_t *temp_label = NULL;
 static lv_obj_t *unity_label = NULL;
