@@ -41,7 +41,6 @@ void app_main(void)
 
     while (true)
     {
-
         // We don't wait any time; if there's nothing there, refresh the screen as quickly as possible.
         if (xQueueReceive(queue_handle, &received, 0) == pdPASS)
         {
@@ -49,12 +48,18 @@ void app_main(void)
             ui_update(received.temp, received.humidity);
         }
 
-        lv_timer_handler();
+        uint32_t time = lv_timer_handler();
 
-        vTaskDelay(
-            // Approximately 60 fps
-            pdMS_TO_TICKS(16) // This setting avoids having to wait too long; a shorter wait time might cause Watchdog to restart.
-        );
+        /**
+         * This is equivalent to an average of 60 FPS (1000ms/60 FPS).
+         *
+         * If LVGL requires more time, we will respect that as well,
+         * even if it means dropping below 60 FPS.
+         */
+        if (time == UINT32_MAX)
+            time = 16;
+
+        vTaskDelay(pdMS_TO_TICKS(time));
     }
 }
 
