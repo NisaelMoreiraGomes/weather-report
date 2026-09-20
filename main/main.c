@@ -97,12 +97,16 @@ static void vDrawTask(void *pvParameters)
         uint32_t time = lv_timer_handler();
 
         /**
-         * This is equivalent to an average of 60 FPS (1000ms/60 FPS).
+         * This is equivalent to an average of 60 FPS (1000ms/60 FPS == 16ms).
          *
          * If LVGL requires more time, we will respect that as well,
          * even if it means dropping below 60 FPS.
+         *
+         * We also guarantee a minimum delay of 16ms to avoid excessive
+         * CPU usage, reducing the load on FreeRTOS and preventing
+         * unnecessary watchdog triggers on the ESP32.
          */
-        if (time == UINT32_MAX)
+        if (time == UINT32_MAX || time < 16)
             time = 16;
 
         vTaskDelay(pdMS_TO_TICKS(time));
