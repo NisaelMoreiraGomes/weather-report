@@ -76,14 +76,6 @@ void ui_setup(void)
     lv_obj_align(img_logo, LV_ALIGN_BOTTOM_MID, 0, 55);
 }
 
-void ui_set_unit_measurement(UNIT_MEASUREMENT unit)
-{
-    if (unit == CELSIUS)
-        lv_label_set_text(unity_label, "C");
-    else
-        lv_label_set_text(unity_label, "F");
-}
-
 void ui_update(int16_t temp, int16_t humidity)
 {
     lv_label_set_text_fmt(temp_label, "%d°", temp);
