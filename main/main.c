@@ -44,12 +44,16 @@ void app_main(void)
     lvgl_setup(get_millis);
     ui_setup();
 
-    xTaskCreate(vReadTempTask, "vReadTempTask", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
+    /**
+     * I removed the ESP_ERROR_CHECK to prevent the board from rebooting.
+     */
+
+    xTaskCreate(vReadTempTask, "vReadTempTask", 2048, NULL, 2, NULL);
     /**
      * I preferred to prioritize reading the sensor.
      * Rendering can wait a bit; the data is more important.
      */
-    xTaskCreate(vDrawTask, "vDrawTask", configMINIMAL_STACK_SIZE * 3, NULL, 1, NULL);
+    xTaskCreate(vDrawTask, "vDrawTask", 4096, NULL, 1, NULL);
 }
 
 static uint32_t get_millis(void)
@@ -66,14 +70,22 @@ static void vReadTempTask(void *pvParameters)
 
     for (;;)
     {
-        ESP_ERROR_CHECK(dht_read_temp(&sensor.temp, &sensor.humidity));
+        esp_err_t result = dht_read_temp(&sensor.temp, &sensor.humidity);
 
-        sensor.temp /= 10;
-        sensor.humidity /= 10;
-
-        if (xQueueSend(queue_handle, &sensor, pdMS_TO_TICKS(QUEUE_SEND_DELAY_MS)) != pdPASS)
+        /**
+         * Sensor read errors may occur, and this is perfectly normal.
+         *
+         * I removed the ESP_ERROR_CHECK to prevent the board from rebooting.
+         */
+        if (result == ESP_OK)
         {
-            ESP_LOGE(TAG, "Error sending data to queue.");
+            sensor.temp /= 10;
+            sensor.humidity /= 10;
+
+            if (xQueueSend(queue_handle, &sensor, pdMS_TO_TICKS(QUEUE_SEND_DELAY_MS)) != pdPASS)
+            {
+                ESP_LOGE(TAG, "Error sending data to queue.");
+            }
         }
 
         // It is recommended to wait 2 seconds before starting the next reading.
