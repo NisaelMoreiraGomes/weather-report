@@ -15,4 +15,4 @@ dependencies:
   #   # All dependencies of `main` are public by default.
   #   public: true
   lvgl/lvgl: ^9.4.0
-  achimpieters/esp32-dht: '^1.0.2'
+  esp-idf-lib/dht: ^1.2.0

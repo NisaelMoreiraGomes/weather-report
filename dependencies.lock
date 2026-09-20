@@ -1,10 +1,11 @@
 dependencies:
-  achimpieters/esp32-dht:
-    component_hash: e605fcdad07d9d9ad63fe14585b14bee8b4b6c7862247bf590cae44226f8e09c
+  esp-idf-lib/dht:
+    component_hash: a0a1b26519566809041bc8fccf754e3ee9b25f73b0decbdc51bfd16143dedd66
     dependencies:
-    - name: idf
+    - name: esp-idf-lib/esp_idf_lib_helpers
+      registry_url: https://components.espressif.com
       require: private
-      version: '>=5.0'
+      version: '*'
     source:
       registry_url: https://components.espressif.com/
       type: service
@@ -15,13 +16,33 @@ dependencies:
     - esp32c5
     - esp32c6
     - esp32c61
+    - esp32h2
+    - esp32p4
     - esp32s2
     - esp32s3
-    version: 1.0.2
+    version: 1.2.0
+  esp-idf-lib/esp_idf_lib_helpers:
+    component_hash: 689853bb8993434f9556af0f2816e808bf77b5d22100144b21f3519993daf237
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com
+      type: service
+    targets:
+    - esp32
+    - esp32c2
+    - esp32c3
+    - esp32c5
+    - esp32c6
+    - esp32c61
+    - esp32h2
+    - esp32p4
+    - esp32s2
+    - esp32s3
+    version: 1.4.0
   idf:
     source:
       type: idf
-    version: 6.0.1
+    version: 6.1.0
   lvgl/lvgl:
     component_hash: 17e68bfd21f0edf4c3ee838e2273da840bf3930e5dbc3bfa6c1190c3aed41f9f
     dependencies: []
@@ -30,9 +51,9 @@ dependencies:
       type: service
     version: 9.4.0
 direct_dependencies:
-- achimpieters/esp32-dht
+- esp-idf-lib/dht
 - idf
 - lvgl/lvgl
-manifest_hash: d79ee8b31953d9af7791bcba3a7cd628b8be87c7f45f95b932c97c0e7226f809
+manifest_hash: 3505a34deadc3b8b5063c2f3d1ec7d4216f9ef2c51c5b1a755b5ade51e6aec51
 target: esp32
 version: 3.0.0
