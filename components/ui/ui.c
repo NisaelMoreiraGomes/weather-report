@@ -5,7 +5,6 @@
 #include "logo.h"
 
 static lv_obj_t *temp_label = NULL;
-static lv_obj_t *unity_label = NULL;
 static lv_obj_t *humidity_label = NULL;
 
 void ui_setup(void)
@@ -51,14 +50,14 @@ void ui_setup(void)
     lv_obj_set_style_text_font(temp_label, &inter_semibold_64, 0);
 
     /**
-     * UNITY Label
+     * UNIT Label
      */
-    unity_label = lv_label_create(panel);
-    lv_label_set_text(unity_label, "C");
-    lv_obj_set_style_text_font(unity_label, &inter_semibold_48, 0);
-    lv_obj_add_flag(unity_label, LV_OBJ_FLAG_FLOATING);
-    lv_obj_set_x(unity_label, (43 * 2) - 5);
-    lv_obj_set_y(unity_label, 43 - 3);
+    lv_obj_t *unit_label = lv_label_create(panel);
+    lv_label_set_text(unit_label, "C");
+    lv_obj_set_style_text_font(unit_label, &inter_semibold_48, 0);
+    lv_obj_add_flag(unit_label, LV_OBJ_FLAG_FLOATING);
+    lv_obj_set_x(unit_label, (43 * 2) - 5);
+    lv_obj_set_y(unit_label, 43 - 3);
 
     /**
      * HUMIDITY Label
@@ -78,6 +77,9 @@ void ui_setup(void)
 
 void ui_update(int16_t temp, int16_t humidity)
 {
-    lv_label_set_text_fmt(temp_label, "%d°", temp);
-    lv_label_set_text_fmt(humidity_label, "%d%%", humidity);
+    if (temp_label != NULL)
+        lv_label_set_text_fmt(temp_label, "%02d°", temp);
+
+    if (humidity_label != NULL)
+        lv_label_set_text_fmt(humidity_label, "%02d%%", humidity);
 }
