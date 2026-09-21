@@ -65,6 +65,9 @@ static void vReadTempTask(void *pvParameters)
 {
     sensor_data_t sensor = {.temp = 0, .humidity = 0};
 
+    int16_t last_temp = -1;
+    int16_t last_humidity = -1;
+
     // Minimum time for components to start and avoid overloading the queue.
     vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -82,9 +85,16 @@ static void vReadTempTask(void *pvParameters)
             sensor.temp /= 10;
             sensor.humidity /= 10;
 
-            if (xQueueSend(queue_handle, &sensor, pdMS_TO_TICKS(QUEUE_SEND_DELAY_MS)) != pdPASS)
+            /**
+             * Prevents sending duplicate values to the queue.
+             */
+            if (sensor.temp != last_temp || sensor.humidity != last_humidity)
             {
-                ESP_LOGE(TAG, "Error sending data to queue.");
+                last_temp = sensor.temp;
+                last_humidity = sensor.humidity;
+
+                if (xQueueSend(queue_handle, &sensor, pdMS_TO_TICKS(QUEUE_SEND_DELAY_MS)) != pdPASS)
+                    ESP_LOGE(TAG, "Error sending data to queue.");
             }
         }
 
@@ -118,7 +128,7 @@ static void vDrawTask(void *pvParameters)
          * CPU usage, reducing the load on FreeRTOS and preventing
          * unnecessary watchdog triggers on the ESP32.
          */
-        if (time == UINT32_MAX || time < 16)
+        if (time == LV_NO_TIMER_READY || time < 16)
             time = 16;
 
         vTaskDelay(pdMS_TO_TICKS(time));
